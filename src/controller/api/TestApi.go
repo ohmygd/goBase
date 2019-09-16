@@ -29,6 +29,7 @@ type Logger struct {
 	logName string
 }
 
+
 var (
 	b *int
 	ee chan int
@@ -36,11 +37,19 @@ var (
 
 	lock sync.Mutex
 	syncMap sync.Map
+	ss *Logger
 )
 
 var db *gorm.DB
 
 func init() {
+	ss = &Logger{
+		"mc",
+		"dj",
+	}
+
+	fmt.Println(ss, "=======")
+
 	c := 5
 	b = &c
 
@@ -69,6 +78,14 @@ func init() {
 	}
 }
 
+type T28s struct {
+	S *time.Time
+}
+
+func Test28(c *gin.Context) {
+
+}
+
 func NewB() *int {
 	return b
 }
@@ -79,6 +96,107 @@ var aaa = map[string]interface{}{
 }
 
 var pool *redis.Pool
+
+func bb (c chan int, sss *sync.WaitGroup) {
+	c <- 2
+	c <- 3
+	sss.Done()
+}
+
+func cc (c chan int, sss *sync.WaitGroup) {
+	c <- 22
+	c <- 33
+	sss.Done()
+}
+
+func Test27(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	go doStuff(ctx)
+
+	//10秒后取消doStuff
+	time.Sleep(5 * time.Second)
+	cancel()
+
+}
+
+func Test29(c *gin.Context) {
+	//for {
+	//	fmt.Println("28======")
+	//}
+}
+
+func doStuff(ctx context.Context) {
+	for {
+		time.Sleep(1 * time.Second)
+		select {
+		case <-ctx.Done():
+			log.Printf("done")
+			return
+		default:
+			log.Printf("work")
+		}
+	}
+}
+
+func for1(ctx context.Context) {
+	a := make(chan int)
+	a <- 1
+	for {
+		time.Sleep(5 * time.Second)
+		fmt.Println("for1")
+	}
+}
+
+func for2() {
+	for {
+		time.Sleep(2 * time.Second)
+		fmt.Println("for2")
+	}
+}
+
+func handle(ctx context.Context, duration time.Duration, arr Logger) {
+	fmt.Printf("%p=======", &ctx)
+
+	select {
+	case <-ctx.Done():
+		fmt.Println("handle", ctx.Err())
+
+	case <-time.After(duration):
+		fmt.Println("process request with", duration)
+	}
+}
+
+func Tmc(ctx context.Context, a string) {
+	name := ctx.Value("name")
+	age := ctx.Value("age")
+
+	fmt.Println(name, age, "=====")
+
+	for {
+		aa := make(chan int)
+		aa <- 1
+	}
+
+}
+
+func Test26(c *gin.Context) {
+	a := time.Now()
+	b := a.Minute()
+	d := a.Second()
+	e := a.Format("2006-01-02")
+	f := a.After(time.Now())
+	g := a.Add(time.Second * 5)
+	h := a.AddDate(0, 1, 0)
+	i := a.Before(a)
+	j1, j2, j3 := a.Clock()
+	k1, k2, k3 := a.Date()
+	l := a.Day()
+	m := a.Equal(a)
+	n := a.Local()
+	o := a.Weekday()
+	p := a.Month()
+	fmt.Println(a, "\r\n", b, "\r\n", d, "\r\n", e, "\r\n", f, "\r\n", g, "\r\n", h, "\r\n", i, "\r\n", j1, "\r\n", j2, "\r\n", j3, "\r\n", k1, "\r\n", k2, "\r\n", k3, "\r\n", l, "\r\n", m, "\r\n", n, "\r\n", o, "\r\n", p)
+}
 
 func Test25(c *gin.Context) {
 	cli, err := clientv3.New(clientv3.Config{
@@ -92,28 +210,29 @@ func Test25(c *gin.Context) {
 
 	fmt.Println("connect succ")
 	defer cli.Close()
-
-	//设置1秒超时，访问etcd有超时控制
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	//操作etcd
-	_, err = cli.Put(ctx, "/name123", "mc12")
-	fmt.Println(err, "---------")
-	//操作完毕，取消etcd
-	cancel()
-	if err != nil {
-		fmt.Println("put failed, err:", err)
-		return
-	}
+	//
+	////设置1秒超时，访问etcd有超时控制
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	////操作etcd
+	//_, err = cli.Put(ctx, "/name123", "mc12")
+	//fmt.Println(err, "---------")
+	////操作完毕，取消etcd
+	//cancel()
+	//if err != nil {
+	//	fmt.Println("put failed, err:", err)
+	//	return
+	//}
 	//取值，设置超时为1秒
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
-	resp, err := cli.Get(ctx, "name2211")
-	fmt.Println(resp, err, "===========")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	resp, err := cli.Get(ctx, "/coupon/http")
+	fmt.Println(resp, err, resp.Kvs, len(resp.Kvs), "===========")
 	cancel()
 	if err != nil {
 		fmt.Println("get failed, err:", err)
 		return
 	}
 	for _, ev := range resp.Kvs {
+		fmt.Println(ev.Key, ev.Value)
 		fmt.Printf("%s : %s\n", ev.Key, ev.Value)
 	}
 }
@@ -146,8 +265,9 @@ func Test22(c *gin.Context) {
 	b := viper.Get("age")
 	d := viper.Get("arr")
 	e := viper.Get("info.add")
+	f := viper.Get("name1")
 
-	fmt.Println(a,b,d,e)
+	fmt.Println(a == "mc",b,d,e,f)
 }
 
 func Test21(c *gin.Context) {

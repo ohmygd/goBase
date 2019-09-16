@@ -37,6 +37,10 @@ func NewRouter() *gin.Engine {
 		v1.GET("/test23", api.Test23)
 		v1.GET("/test24", api.Test24)
 		v1.GET("/test25", api.Test25)
+		v1.GET("/test26", api.Test26)
+		v1.GET("/test27", api.Test27)
+		v1.GET("/test28", api.Test28)
+		v1.GET("/test29", api.Test29)
 	}
 
 	return router
